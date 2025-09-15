@@ -1,11 +1,26 @@
 {
   "version": 2,
-  "buildCommand": "cd src/frontend && npm ci && npm run build",
-  "outputDirectory": "src/frontend/dist",
-  "installCommand": "npm ci",
-  "functions": {
-    "src/backend/src/index.ts": {
-      "runtime": "nodejs18.x"
+  "builds": [
+    {
+      "src": "src/frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/src/frontend/dist/$1"
+    }
+  ]
 }

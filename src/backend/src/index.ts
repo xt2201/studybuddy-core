@@ -1,34 +1,15 @@
-// Type declarations for Node.js globals and require function
-declare const require: any;
-declare const process: {
-  env: {
-    [key: string]: string | undefined;
-    PORT?: string;
-    NODE_ENV?: string;
-    DATABASE_URL?: string;
-    OPENAI_API_KEY?: string;
-    GOOGLE_CREDENTIALS_CONTENT?: string;
-  };
-};
-
-declare const console: {
-  log: (...args: any[]) => void;
-  error: (...args: any[]) => void;
-  warn: (...args: any[]) => void;
-};
-
-// Node.js and external library imports with require for better compatibility
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-
-// Import route modules
-const { tasksRouter } = require('./routes/tasks.js');
-const { analyticsRouter } = require('./routes/analytics.js');
-const aiRouter = require('./routes/ai.js');
-const { googleCalendarRouter } = require('./routes/google-calendar.js');
+// ES6 imports for better TypeScript compatibility
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
 dotenv.config();
+
+// Import route modules
+import { tasksRouter } from './routes/tasks';
+import { analyticsRouter } from './routes/analytics';
+import aiRouter from './routes/ai';
+import { googleCalendarRouter } from './routes/google-calendar';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -88,6 +69,12 @@ app.use((error: any, req: any, res: any, next: any) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 StudyBuddy Backend server is running on port ${PORT}`);
-});
+// For serverless deployment, export the app instead of listening
+export default app;
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 StudyBuddy Backend server is running on port ${PORT}`);
+  });
+}
