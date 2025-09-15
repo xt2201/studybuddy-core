@@ -1,18 +1,23 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { IncomingMessage, ServerResponse } from 'http';
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default function handler(req: IncomingMessage, res: ServerResponse) {
   const requiredEnvVars = ['DATABASE_URL', 'OPENAI_API_KEY'];
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
   
   if (missingVars.length > 0) {
-    return res.status(500).json({ 
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ 
       status: 'ERROR', 
       message: 'Missing environment variables', 
       missing: missingVars 
-    });
+    }));
+    return;
   }
   
-  res.json({ 
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify({ 
     status: 'OK', 
     message: 'StudyBuddy Backend is running',
     env: {
@@ -20,5 +25,5 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
       hasOpenAI: !!process.env.OPENAI_API_KEY,
       hasGoogleCreds: !!process.env.GOOGLE_CREDENTIALS_CONTENT,
     }
-  });
+  }));
 }

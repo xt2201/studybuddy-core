@@ -1,16 +1,18 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { IncomingMessage, ServerResponse } from 'http';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: IncomingMessage & { body?: any, method?: string, url?: string }, res: ServerResponse) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.statusCode = 200;
+    res.end();
+    return;
   }
 
   try {
@@ -18,7 +20,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const tasks = await prisma.task.findMany({
         orderBy: { createdAt: 'desc' }
       });
-      return res.json(tasks);
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify(tasks));
+      return;
     }
 
     if (req.method === 'POST') {
@@ -34,13 +39,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       });
       
-      return res.status(201).json(task);
+      res.statusCode = 201;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify(task));
+      return;
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    res.statusCode = 405;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ error: 'Method not allowed' }));
   } catch (error) {
     console.error('Tasks API error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ error: 'Internal server error' }));
   } finally {
     await prisma.$disconnect();
   }

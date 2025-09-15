@@ -4,7 +4,6 @@
   "main": "index.ts",
   "dependencies": {
     "@prisma/client": "^6.7.0",
-    "@vercel/node": "^3.0.0",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.6.1",
