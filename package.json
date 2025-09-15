@@ -1,0 +1,15 @@
+{
+  "name": "studybuddy-core",
+  "version": "1.0.0",
+  "description": "StudyBuddy - Smart Study Management App",
+  "scripts": {
+    "build": "cd src/frontend && npm install && npm run build && cd ../backend && npm install && npx prisma generate && npm run build",
+    "dev": "echo 'Use npm run dev in frontend or backend directories'",
+    "start": "echo 'This is a full-stack app. Frontend is static, backend runs on Vercel Functions.'"
+  },
+  "workspaces": [
+    "src/frontend",
+    "src/backend"
+  ],
+  "private": true
+}

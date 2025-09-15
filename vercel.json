@@ -1,18 +1,18 @@
 {
   "version": 2,
   "functions": {
-    "backend/src/index.ts": {
+    "src/backend/src/index.ts": {
       "runtime": "@vercel/node@3"
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/backend/src/index.ts"
+      "destination": "/src/backend/src/index.ts"
     },
     {
       "source": "/(.*)",
-      "destination": "/frontend/index.html"
+      "destination": "/src/frontend/index.html"
     }
   ]
 }
