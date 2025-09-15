@@ -5,7 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "npx prisma generate && tsc",
+    "vercel-build": "npx prisma generate && npx prisma db push && tsc",
+    "postinstall": "npx prisma generate",
     "start": "node dist/index.js",
     "seed": "tsx --require dotenv/config scripts/seed.ts",
     "test": "jest",

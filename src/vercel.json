@@ -14,8 +14,9 @@
       "src": "backend/src/index.ts",
       "use": "@vercel/node",
       "config": {
-        "installCommand": "cd backend && npm install && npx prisma generate && npx prisma db push",
-        "includeFiles": ["backend/prisma/**"]
+        "installCommand": "cd backend && npm install",
+        "buildCommand": "cd backend && node build.js",
+        "includeFiles": ["backend/prisma/**", "backend/dist/**"]
       }
     }
   ],

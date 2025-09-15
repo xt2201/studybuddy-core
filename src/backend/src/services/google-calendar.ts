@@ -1,12 +1,51 @@
-import { google, calendar_v3 } from 'googleapis';
-import { OAuth2Client } from 'google-auth-library';
-import { PrismaClient, Task, Priority, Status } from '@prisma/client';
-import fs from 'fs/promises';
-import path from 'path';
+// Node.js and external library imports with proper type handling
+const { google } = require('googleapis');
+const { OAuth2Client } = require('google-auth-library');
+const { PrismaClient } = require('@prisma/client');
+const fs = require('fs').promises;
+
+// Type declarations for external modules and Node.js globals
+declare const require: any;
+declare const process: {
+  env: {
+    [key: string]: string | undefined;
+    NODE_ENV?: string;
+    VERCEL?: string;
+    GOOGLE_CREDENTIALS_CONTENT?: string;
+    GOOGLE_TOKEN_CONTENT?: string;
+  };
+};
+
+declare const console: {
+  log: (...args: any[]) => void;
+  error: (...args: any[]) => void;
+  warn: (...args: any[]) => void;
+};
+
+declare const setTimeout: (callback: () => void, delay: number) => any;
+
+// Type definitions for Prisma models
+type Task = {
+  id: string;
+  title: string;
+  description?: string | null;
+  deadline: Date;
+  priority: 'low' | 'medium' | 'high';
+  estimateMinutes: number;
+  status: 'todo' | 'doing' | 'done';
+  googleEventId?: string | null;
+  googleCalendarId?: string | null;
+  lastSyncedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type Priority = 'low' | 'medium' | 'high';
+type Status = 'todo' | 'doing' | 'done';
 
 interface GoogleCalendarConfig {
-  credentialsPath: string;
-  tokenPath: string;
+  credentialsPath?: string;
+  tokenPath?: string;
   calendarId: string;
   scopes: string[];
 }
@@ -33,12 +72,12 @@ interface TaskEventMapping {
 }
 
 export class GoogleCalendarService {
-  private auth: OAuth2Client | null = null;
-  private calendar: calendar_v3.Calendar | null = null;
+  private auth: any = null;
+  private calendar: any = null;
   private config: GoogleCalendarConfig;
-  private prisma: PrismaClient;
+  private prisma: any;
 
-  constructor(config: GoogleCalendarConfig, prisma: PrismaClient) {
+  constructor(config: GoogleCalendarConfig, prisma: any) {
     this.config = config;
     this.prisma = prisma;
   }
@@ -54,7 +93,7 @@ export class GoogleCalendarService {
 
       // Create OAuth2 client
       const { client_secret, client_id, redirect_uris } = credentials.installed || credentials.web;
-      this.auth = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+      this.auth = new (OAuth2Client as any)(client_id, client_secret, redirect_uris[0]);
 
       // Load existing token if available
       try {
@@ -109,10 +148,19 @@ export class GoogleCalendarService {
   }
 
   /**
-   * Save token to file
+   * Save token to file or environment variable
    */
   private async saveToken(token: any): Promise<void> {
-    await fs.writeFile(this.config.tokenPath, JSON.stringify(token, null, 2));
+    // In production (Vercel), we can't write files, so we log the token
+    // In local development, we save to file
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+      // tslint:disable-next-line:no-console
+      console.log('Production environment detected. Token should be saved as GOOGLE_TOKEN_CONTENT environment variable:');
+      // tslint:disable-next-line:no-console
+      console.log(JSON.stringify(token, null, 2));
+    } else if (this.config.tokenPath) {
+      await fs.writeFile(this.config.tokenPath, JSON.stringify(token, null, 2));
+    }
   }
 
   /**
@@ -225,7 +273,7 @@ export class GoogleCalendarService {
   /**
    * List Google Calendar events in date range
    */
-  async listEvents(timeMin?: Date, timeMax?: Date): Promise<calendar_v3.Schema$Event[]> {
+  async listEvents(timeMin?: Date, timeMax?: Date): Promise<any[]> {
     if (!this.calendar) {
       throw new Error('Calendar service not initialized');
     }
@@ -350,7 +398,7 @@ export class GoogleCalendarService {
   /**
    * Convert Google Calendar event to Task data
    */
-  private async eventResourceToTask(event: calendar_v3.Schema$Event): Promise<any | null> {
+  private async eventResourceToTask(event: any): Promise<any | null> {
     if (!event.start?.dateTime || !event.summary) {
       return null;
     }
@@ -390,7 +438,7 @@ export class GoogleCalendarService {
     if (error.code === 429 || error.status === 429) {
       const retryAfter = error.headers?.['retry-after'] ? parseInt(error.headers['retry-after']) * 1000 : 5000;
       console.log(`Rate limited. Waiting ${retryAfter}ms before retry...`);
-      await new Promise(resolve => setTimeout(resolve, retryAfter));
+      await new Promise((resolve: any) => setTimeout(() => resolve(), retryAfter));
     }
   }
 }
