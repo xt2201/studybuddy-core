@@ -1,10 +1,32 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import { tasksRouter } from './routes/tasks.js';
-import { analyticsRouter } from './routes/analytics.js';
-import aiRouter from './routes/ai.js';
-import { googleCalendarRouter } from './routes/google-calendar.js';
+// Type declarations for Node.js globals and require function
+declare const require: any;
+declare const process: {
+  env: {
+    [key: string]: string | undefined;
+    PORT?: string;
+    NODE_ENV?: string;
+    DATABASE_URL?: string;
+    OPENAI_API_KEY?: string;
+    GOOGLE_CREDENTIALS_CONTENT?: string;
+  };
+};
+
+declare const console: {
+  log: (...args: any[]) => void;
+  error: (...args: any[]) => void;
+  warn: (...args: any[]) => void;
+};
+
+// Node.js and external library imports with require for better compatibility
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+
+// Import route modules
+const { tasksRouter } = require('./routes/tasks.js');
+const { analyticsRouter } = require('./routes/analytics.js');
+const aiRouter = require('./routes/ai.js');
+const { googleCalendarRouter } = require('./routes/google-calendar.js');
 
 dotenv.config();
 
