@@ -1,0 +1,38 @@
+generator client {
+    provider = "prisma-client-js"
+    output   = "./node_modules/@prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Priority {
+  low
+  medium
+  high
+}
+
+enum Status {
+  todo
+  doing
+  done
+}
+
+model Task {
+  id              String    @id @default(cuid())
+  title           String
+  description     String?
+  deadline        DateTime
+  priority        Priority  @default(medium)
+  estimateMinutes Int
+  status          Status    @default(todo)
+  googleEventId   String?   @unique
+  googleCalendarId String?
+  lastSyncedAt    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("tasks")
+}
