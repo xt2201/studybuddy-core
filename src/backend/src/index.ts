@@ -32,9 +32,38 @@ app.use('/api/analytics', analyticsRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/google-calendar', googleCalendarRouter);
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'StudyBuddy Backend is running' });
+// Health check with environment validation
+app.get('/health', (req: any, res: any) => {
+  const requiredEnvVars = ['DATABASE_URL', 'OPENAI_API_KEY'];
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  
+  if (missingVars.length > 0) {
+    return res.status(500).json({ 
+      status: 'ERROR', 
+      message: 'Missing environment variables', 
+      missing: missingVars 
+    });
+  }
+  
+  res.json({ 
+    status: 'OK', 
+    message: 'StudyBuddy Backend is running',
+    env: {
+      hasDatabase: !!process.env.DATABASE_URL,
+      hasOpenAI: !!process.env.OPENAI_API_KEY,
+      hasGoogleCreds: !!process.env.GOOGLE_CREDENTIALS_CONTENT,
+    }
+  });
+});
+
+// Error handling middleware
+app.use((error: any, req: any, res: any, next: any) => {
+  console.error('Unhandled error:', error);
+  res.status(500).json({ 
+    status: 'ERROR', 
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+  });
 });
 
 app.listen(PORT, () => {
