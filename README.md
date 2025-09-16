@@ -1,3 +1,5 @@
+# NAVER Vietnam AI HACKATHON 2025 - Round 1
+
 # StudyBuddy - Ứng dụng Quản lý Học tập Thông minh
 
 ## 🚀 Project Setup & Usage
